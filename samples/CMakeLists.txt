@@ -52,31 +52,11 @@ set(ORDER_LIST
     "hello_triangle"
     "dynamic_uniform_buffers"
     "texture_loading"
-    "hdr"
-    "instancing"
     "compute_nbody"
-    "terrain_tessellation"
 
-    #Extension Samples
-    "conservative_rasterization"
-    "push_descriptors"
-    "raytracing_basic"
-
-    #Performance Samples
-    "swapchain_images"
-    "surface_rotation"
-    "pipeline_cache"
-    "descriptor_management"
-    "constant_data"
-    "render_passes"
-    "msaa"
-    "subpasses"
-    "pipeline_barriers"
-    "wait_idle"
-    "layout_transitions"
-    "specialization_constants"
-    "command_buffer_usage"
-    "afbc")
+    #Developer Samples
+    "linsss"
+)
 
 # Orders the sample ids by the order list above
 order_sample_list(

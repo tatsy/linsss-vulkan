@@ -49,11 +49,6 @@ add_subdirectory(third_party)
 # Add vulkan framework
 add_subdirectory(framework)
 
-if(VKB_BUILD_TESTS)
-    # Add vulkan tests
-    add_subdirectory(tests)
-endif()
-
 if(VKB_BUILD_SAMPLES)
     # Add vulkan samples
     add_subdirectory(samples)
