@@ -434,6 +434,18 @@ VkPipelineShaderStageCreateInfo ApiVulkanSample::load_shader(const std::string &
 	return shader_stage;
 }
 
+VkPipelineShaderStageCreateInfo ApiVulkanSample::load_spirv(const std::string &file, VkShaderStageFlagBits stage)
+{
+    VkPipelineShaderStageCreateInfo shader_stage = {};
+    shader_stage.sType                           = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shader_stage.stage                           = stage;
+    shader_stage.module                          = vkb::load_spirv(file.c_str(), device->get_handle(), stage);
+    shader_stage.pName                           = "main";
+    assert(shader_stage.module != VK_NULL_HANDLE);
+    shader_modules.push_back(shader_stage.module);
+    return shader_stage;
+}
+
 void ApiVulkanSample::update_overlay(float delta_time)
 {
 	if (gui)

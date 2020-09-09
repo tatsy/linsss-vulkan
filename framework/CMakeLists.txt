@@ -38,6 +38,7 @@ set(FRAMEWORK_FILES
     api_vulkan_sample.h
     timer.h
     camera.h
+    filesystem.h
     # Source Files
     gui.cpp
     glsl_compiler.cpp
@@ -399,6 +400,7 @@ target_link_libraries(${PROJECT_NAME}
     astc
     imgui
     tinygltf
+    tinyply
     glm
     glslang
     SPIRV

@@ -368,6 +368,25 @@ VkShaderModule load_shader(const std::string &filename, VkDevice device, VkShade
 	return shader_module;
 }
 
+VkShaderModule load_spirv(const std::string &filename, VkDevice device, VkShaderStageFlagBits stage)
+{
+    auto spirv = vkb::fs::read_shader_binary(filename);
+    if (spirv.empty()) {
+        LOGE("Failed to load SPIR-V: {}", filename);
+        return VK_NULL_HANDLE;
+    }
+
+    VkShaderModule shader_module;
+    VkShaderModuleCreateInfo module_create_info{};
+    module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    module_create_info.codeSize = spirv.size() * sizeof(uint8_t);
+    module_create_info.pCode = (uint32_t*)spirv.data();
+
+    VK_CHECK(vkCreateShaderModule(device, &module_create_info, NULL, &shader_module));
+
+    return shader_module;
+}
+
 // Create an image memory barrier for changing the layout of
 // an image and put it into an active command buffer
 // See chapter 11.4 "Image Layout" for details

@@ -126,7 +126,9 @@ endif()
 
 if(MSVC)
     #Set the working directory to the source of the project so developer dont have to
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_FLAGS "/DEBUG /PROFILE")
 
     #Configure output paths
     foreach(CONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})

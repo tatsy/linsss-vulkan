@@ -165,6 +165,34 @@ function(add_sample)
             ${TARGET_LIBS})
 endfunction()
 
+function(add_shaders)
+    set(options)
+    set(oneValueArgs TARGET WORKDIR)
+    set(multiValueArgs FILES)
+
+    cmake_parse_arguments(OPTS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    set(INPUT_SHADERS "")
+    set(OUTPUT_SHADERS "")
+    foreach (SHADER IN LISTS OPTS_FILES)
+        set(INPUT_SHADERS ${INPUT_SHADERS} ${OPTS_WORKDIR}/${SHADER})
+        set(OUTPUT_SHADERS ${OUTPUT_SHADERS} ${SHADER}.spv)
+    endforeach()
+
+    add_custom_command(OUTPUT ${OUTPUT_SHADERS}
+        COMMAND glslc
+        ARGS -c ${INPUT_SHADERS}
+        DEPENDS ${INPUT_SHADERS}
+        WORKING_DIRECTORY ${OPTS_WORKDIR})
+
+    set(CUSTOM_TARGET "${OPTS_TARGET}_glslc_compile")
+    add_custom_target(${CUSTOM_TARGET} ALL SOURCES ${INPUT_SHADERS} ${OUTPUT_SHADERS})
+    add_dependencies(${OPTS_TARGET} ${CUSTOM_TARGET})
+
+    source_group("glsl" FILES ${INPUT_SHADERS})
+    source_group("spirv" FILES ${OUTPUT_SHADERS})
+endfunction()
+
 function(add_sample_with_tags)
     set(options)
     set(oneValueArgs ID CATEGORY AUTHOR NAME DESCRIPTION)
@@ -344,7 +372,9 @@ function(add_project)
         endif()
 
         if(MSVC)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
             set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+            set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_FLAGS "/DEBUG /PROFILE")
             
             foreach(CONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})
                 string(TOUPPER ${CONFIG_TYPE} SUFFIX)

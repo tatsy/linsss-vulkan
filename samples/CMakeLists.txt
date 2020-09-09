@@ -50,9 +50,6 @@ endforeach()
 set(ORDER_LIST
     #API Samples
     "hello_triangle"
-    "dynamic_uniform_buffers"
-    "texture_loading"
-    "compute_nbody"
 
     #Developer Samples
     "linsss"

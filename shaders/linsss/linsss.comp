@@ -1,0 +1,84 @@
+#version 450
+
+#include "utils.glsl"
+
+layout(local_size_x = 32, local_size_y = 32) in;
+
+layout(rgba32f, binding = 0) uniform writeonly image2D outImage;
+
+layout (binding = 1) uniform UBO {
+    vec4 sigmas[8];
+    float texOffsetX;
+    float texOffsetY;
+    float texScale;
+    float irrScale;
+} ubo;
+
+layout (binding = 2) uniform sampler3D tex_W;
+layout (binding = 3) uniform sampler3D tex_G_ast_W;
+layout (binding = 4) uniform sampler2D tex_G_ast_Phi;
+layout (binding = 5) uniform sampler2D posTex;
+layout (binding = 6) uniform sampler2D normTex;
+layout (binding = 7) uniform sampler2D depthTex;
+
+layout (constant_id = 0) const int numGauss = 8;
+shared vec3 mipLevels[numGauss];
+
+void main(void) {
+    const ivec2 globalIdx = ivec2(gl_GlobalInvocationID);
+	const ivec2 threadIdx = ivec2(gl_LocalInvocationID);
+	const ivec2 blockSize = ivec2(gl_WorkGroupSize);
+    const ivec2 frameSize = imageSize(outImage);
+
+    const ivec2 pixelPos = ivec2(gl_GlobalInvocationID);
+    const vec2 pixelUV = vec2((pixelPos.x + 0.5) / float(frameSize.x), (pixelPos.y + 0.5) / float(frameSize.y)); 
+
+	// Sigmas
+    const int k = threadIdx.y * blockSize.x + threadIdx.x;
+	if (k < numGauss) {
+		const vec3 s = ubo.sigmas[k].xyz;
+        mipLevels[k].x = s.x >= 1.0 ? log2(s.x) + 1.0 : s.x;
+		mipLevels[k].y = s.y >= 1.0 ? log2(s.y) + 1.0 : s.y;
+		mipLevels[k].z = s.z >= 1.0 ? log2(s.z) + 1.0 : s.z;
+
+        // Since access to high mip level causes flickering artifact,
+        // 2.0 is multiplied to sigma used in Gaussian filtering (in gauss_filter.comp).
+        // Alternatively, 0.5 is multiplied to the mip level.
+        mipLevels[k] *= 0.5;
+	}
+    memoryBarrierShared();
+    barrier();
+
+    // Convolution
+    if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < frameSize.x && pixelPos.y < frameSize.y) {
+        const bool isMasked = texture(depthTex, pixelUV).x > 0;
+
+        vec3 res = vec3(0.0, 0.0, 0.0);
+        if (isMasked) {
+            vec2 pos = texture(posTex, pixelUV).xy;
+            // Necessary to change W's UV space
+            vec3 uvw;
+			uvw.xy = pos * 0.5 * ubo.texScale + 0.5;
+            uvw.x += ubo.texOffsetX;
+            uvw.y += ubo.texOffsetY;
+
+            vec3 accum = vec3(0.0, 0.0, 0.0);
+            for (int h = 0; h < numGauss; h++) {
+                // G x (W o E)
+                vec3 G_ast_Phi = vec3(0.0, 0.0, 0.0);
+                G_ast_Phi.x = textureLod(tex_G_ast_Phi, pixelUV, mipLevels[h].x).x;
+                G_ast_Phi.y = textureLod(tex_G_ast_Phi, pixelUV, mipLevels[h].y).y;
+                G_ast_Phi.z = textureLod(tex_G_ast_Phi, pixelUV, mipLevels[h].z).z;
+
+				uvw.z = (h + 0.5) / float(numGauss);
+                vec3 W = texture(tex_W, uvw).rgb;
+                vec3 G_ast_W = texture(tex_G_ast_W, uvw).rgb;
+                accum += 0.5 * (G_ast_W + W) * G_ast_Phi * ubo.irrScale;
+            }
+
+        	imageStore(outImage, pixelPos, vec4(accum, 1.0));
+        } else {
+            imageStore(outImage, pixelPos, vec4(0.0, 0.0, 0.0, 1.0));
+        }
+    }
+}

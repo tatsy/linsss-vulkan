@@ -41,6 +41,12 @@ set(TINYGLTF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf)
 target_sources(tinygltf INTERFACE ${TINYGLTF_DIR}/tiny_gltf.h ${TINYGLTF_DIR}/json.hpp)
 target_include_directories(tinygltf INTERFACE ${TINYGLTF_DIR})
 
+# tinyply
+add_library(tinyply INTERFACE)
+set(TINYPLY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tinyply/source)
+target_sources(tinyply INTERFACE ${TINYPLY_DIR}/tinyply.h ${TINYPLY_DIR}/tinyply.cpp)
+target_include_directories(tinyply INTERFACE ${TINYPLY_DIR})
+
 # vulkan
 add_library(vulkan INTERFACE)
 set(VULKAN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vulkan/include)

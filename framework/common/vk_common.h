@@ -100,6 +100,15 @@ int32_t get_bits_per_pixel(VkFormat format);
 VkShaderModule load_shader(const std::string &filename, VkDevice device, VkShaderStageFlagBits stage);
 
 /**
+ * @brief Helper function to create a VkShaderModule
+ * @param filename The SPIR-V location
+ * @param device The logical device
+ * @param stage The shader stage
+ * @return The string to return
+ */
+VkShaderModule load_spirv(const std::string &filename, VkDevice device, VkShaderStageFlagBits stage);
+
+/**
  * @brief Image memory barrier structure used to define
  *        memory access for an image view during command recording.
  */

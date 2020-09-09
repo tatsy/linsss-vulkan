@@ -1,0 +1,140 @@
+#version 450
+
+#include "utils.glsl"
+
+layout(local_size_x = 32, local_size_y = 32) in;
+
+// Input/output image storages
+layout (rgba32f, binding = 0) uniform readonly image2D inImage;
+layout (rgba32f, binding = 1) uniform writeonly image2D outImage;
+layout (rgba32f, binding = 2) uniform coherent image2D bufImage;
+
+// Uniform buffer object
+layout (binding = 3) uniform UBO {
+    float sigma;
+    int direction;
+} ubo;
+
+// Image samplers
+layout (binding = 4) uniform sampler2D posTex;
+layout (binding = 5) uniform sampler2D normTex;
+layout (binding = 6) uniform sampler2D depthTex;
+
+// SSSSS parameters
+layout (constant_id = 0) const float sssLevel = 31.5;
+layout (constant_id = 1) const float correction = 800.0;
+layout (constant_id = 2) const float maxdd = 0.001;
+layout (constant_id = 3) const int ksize = 31;
+shared float kernel[ksize];
+
+float gauss(in float x, in float s) {
+	const float invs = 1.0 / s;
+    return M_INV_SQRT_TWO_PI * invs * exp(-0.5 * x * x * invs * invs);
+}
+
+float depthWeight(float dz) {
+	return exp(-4.0 * dz * dz);
+}
+
+float normWeight(vec3 n1, vec3 n2) {
+	return exp(dot(n1, n2) - 1.0);
+}
+
+vec2 to_uv(in float x, in float y, in float w, in float h) {
+	return vec2((x + 0.5) / w, (y + 0.5) / h);
+}
+
+vec4 texGrad(sampler2D samp, in float x, in float y, in float width, in float height, in float dx, in float dy) {
+    vec4 v0 = texture(samp, to_uv(x - dx, y - dy, width, height));
+    vec4 v1 = texture(samp, to_uv(x + dx, y + dy, width, height));
+    return 0.5 * (v1 - v0);
+}
+
+void main() {
+    const ivec2 globalIdx = ivec2(gl_GlobalInvocationID);
+	const ivec2 threadIdx = ivec2(gl_LocalInvocationID);
+	const ivec2 blockSize = ivec2(gl_WorkGroupSize);
+    const ivec2 outSize = imageSize(outImage);
+    const int radius = (ksize - 1) / 2;
+
+	const int x0 = globalIdx.x;
+	const int y0 = globalIdx.y;
+	const int width = outSize.x;
+	const int height = outSize.y;
+	const bool isInsideFrame = (x0 >= 0 && y0 >= 0 && x0 < width && y0 < height);
+
+	// Compute kernel table
+	const int k = threadIdx.y * blockSize.x + threadIdx.x;
+	if (k < ksize) {
+		kernel[k] = gauss(k, ubo.sigma * 2.0);
+	}
+	memoryBarrierShared();
+    barrier();
+
+    // Consider object geometry
+    // See the article "Screen-space Subsurface Scattering" in GPU Pro.
+    float depth = texture(depthTex, to_uv(x0, y0, width, height)).x * 0.25;
+    float dzdx = texGrad(depthTex, x0, y0, width, height, 1.0, 0.0).x;
+    float dzdy = texGrad(depthTex, x0, y0, width, height, 0.0, 1.0).x;
+    float s_x = sssLevel / (depth + correction * min(abs(dzdx), maxdd));
+    float s_y = sssLevel / (depth + correction * min(abs(dzdy), maxdd));
+    s_x = max(0.5, min(s_x, 2.0));
+    s_y = max(0.5, min(s_y, 2.0));
+
+    // Central parameters
+    vec2 uv0 = to_uv(x0, y0, width, height);
+    vec3 posCenter = texture(posTex, uv0).xyz;
+    vec3 normCenter = texture(normTex, uv0).xyz;
+
+    bool isMaskedCenter = texture(depthTex, to_uv(x0, y0, width, height)).x > 0;
+
+    // Horizontal filter
+    if (ubo.direction == 0) {
+        if (isMaskedCenter) {
+		    vec3 sum = vec3(0.0, 0.0, 0.0);
+            float sumWgt = 0.0;
+            for (int i = -radius; i <= radius; i++) {
+			    const float x = x0 + i * s_x;
+                const vec2 uv = to_uv(x, y0, width, height);
+            
+                const vec3 pos = texture(posTex, uv).xyz;
+                const vec3 norm = texture(normTex, uv).xyz;
+                const float dz = pos.z - posCenter.z;
+
+                const float maskBit = texture(depthTex, uv).x > 0.0 ? 1.0 : 0.0;
+                const float G = kernel[abs(i)] * maskBit * depthWeight(dz) * normWeight(norm, normCenter);
+                sum += G * imageLoad(inImage, ivec2(x, y0)).rgb;
+                sumWgt += G;
+            }
+            sum /= (sumWgt + M_EPS);
+            imageStore(bufImage, globalIdx, vec4(sum, 1.0));
+        } else {
+            imageStore(bufImage, globalIdx, vec4(0.0, 0.0, 0.0, 1.0));
+        }
+    }
+
+    // Vertical filter
+    if (ubo.direction == 1) {
+        if (isMaskedCenter) {
+		    vec3 sum = vec3(0.0, 0.0, 0.0);
+		    float sumWgt = 0.0;
+            for (int i = -radius; i <= radius; i++) {
+			    const float y = y0 + i * s_y;
+                const vec2 uv = to_uv(x0, y, width, height);
+
+                const vec3 pos = texture(posTex, uv).xyz;
+                const vec3 norm = texture(normTex, uv).xyz;
+                const float dz = pos.z - posCenter.z;
+
+                const float maskBit = texture(depthTex, uv).x > 0.0 ? 1.0 : 0.0;
+                const float G = kernel[abs(i)] * maskBit * depthWeight(dz) * normWeight(norm, normCenter);
+                sum += G * imageLoad(bufImage, ivec2(x0, y)).rgb;
+                sumWgt += G;
+            }
+            sum /= (sumWgt + M_EPS);
+            imageStore(outImage, globalIdx, vec4(sum, 1.0));
+        } else {
+            imageStore(outImage, globalIdx, vec4(0.0, 0.0, 0.0, 1.0));        
+        }
+    }
+}
