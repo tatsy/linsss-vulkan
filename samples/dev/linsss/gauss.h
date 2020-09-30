@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020, Tatsuya Yatagawa
+ * LinSSS: Linear decomposition of heterogeneous subsurface scattering for
+ * real-time screen-space rendering.
+ */
+
 #ifdef _MSC_VER
 #pragma once
 #endif

@@ -14,6 +14,8 @@ Build
 
 - Windows 10, Visual Studio 2019, Vulkan SDK 1.2
 
+**We know that our program as well as some samples in Vulkan-Samples do not work on MacOS Letina and multiple GPU environments.**
+
 ### Setup
 
 Clone this repository to your local disk.
@@ -51,12 +53,12 @@ Screen Shot
 
 <table>
   <tr>
-    <td width="50%">Point light</td>
-    <td width="50%">Point light</td>
+    <td width="50%"><span class="font-weight: bold;">Point light</span></td>
+    <td width="50%"><span class="font-weight: bold;">Uffizi gallery</span></td>
   </tr>
   <tr>
     <td><img src="./figures/linsss_heart_point.jpg" alt="linsss-heart-point"/></td>
-    <td><img src="./figures/linsss_marble_grace.jpg" alt="linsss-marble-grace"/></td>
+    <td><img src="./figures/linsss_marble_uffizi.jpg" alt="linsss-marble-uffizi"/></td>
   </tr>
 </table>
 

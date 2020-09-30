@@ -1,22 +1,7 @@
-/* Copyright (c) 2019-2020, Sascha Willems
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /*
- * Texture loading (and display) example (including mip maps)
+ * Copyright (c) 2020, Tatsuya Yatagawa
+ * LinSSS: Linear decomposition of heterogeneous subsurface scattering for
+ * real-time screen-space rendering.
  */
 
 #include "linsss.h"
@@ -38,7 +23,7 @@ static constexpr int      TSM_UPSAMPLE_RATIO = 4;
 LinSSScatter::LinSSScatter()
 {
     default_clear_color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-    zoom                = -3.5f;
+    zoom                = -3.0f;
     rotation            = {180.0f, 0.0f, 0.0f};
     title               = "LinSSS";
     name                = "LinSSS";
@@ -916,13 +901,13 @@ void LinSSScatter::setup_custom_framebuffers()
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
                 {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
-            VkClearColorValue clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
+            VkClearColorValue       clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
             VkImageSubresourceRange subresource_range;
-            subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            subresource_range.baseMipLevel = 0;
-            subresource_range.levelCount = 1;
+            subresource_range.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+            subresource_range.baseMipLevel   = 0;
+            subresource_range.levelCount     = 1;
             subresource_range.baseArrayLayer = 0;
-            subresource_range.layerCount = 1;
+            subresource_range.layerCount     = 1;
 
             vkCmdClearColorImage(
                 command_buffer,
@@ -1017,13 +1002,13 @@ void LinSSScatter::setup_custom_framebuffers()
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
                 {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
-            VkClearColorValue clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
+            VkClearColorValue       clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
             VkImageSubresourceRange subresource_range;
-            subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            subresource_range.baseMipLevel = 0;
-            subresource_range.levelCount = 1;
+            subresource_range.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+            subresource_range.baseMipLevel   = 0;
+            subresource_range.levelCount     = 1;
             subresource_range.baseArrayLayer = 0;
-            subresource_range.layerCount = 1;
+            subresource_range.layerCount     = 1;
 
             vkCmdClearColorImage(
                 command_buffer,
@@ -1236,7 +1221,7 @@ void LinSSScatter::prepare_texture(LinSSScatter::Texture &texture, const std::st
             for (uint32_t i = 0; i < image_width * image_height * image_channels; i++)
             {
                 const float v = static_cast<float>(bytes[i]) * scale;
-                bytes[i] = static_cast<uint8_t>(std::max(0.0f, std::min(v, 255.0f)));
+                bytes[i]      = static_cast<uint8_t>(std::max(0.0f, std::min(v, 255.0f)));
             }
         }
 
@@ -2107,7 +2092,7 @@ void LinSSScatter::build_command_buffers()
                     // Draw
                     vkCmdBindPipeline(draw_cmd_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.trans_sm);
                     vkCmdBindVertexBuffers(draw_cmd_buffers[i], 0, 1, model.vertex_buffer->get(), offsets);
-                    vkCmdBindIndexBuffer(draw_cmd_buffers[i], model.index_buffer->get_handle(), 0, VK_INDEX_TYPE_UINT32);                
+                    vkCmdBindIndexBuffer(draw_cmd_buffers[i], model.index_buffer->get_handle(), 0, VK_INDEX_TYPE_UINT32);
                     vkCmdDrawIndexed(draw_cmd_buffers[i], model.index_count, 1, 0, 0, 0);
                 }
                 vkCmdEndRenderPass(draw_cmd_buffers[i]);
@@ -2124,19 +2109,19 @@ void LinSSScatter::build_command_buffers()
                     {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
                 vkb::insert_image_memory_barrier(
-                        draw_cmd_buffers[i],
-                        fbos.trans_sm[pong_index].images[0].get_handle(),
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                        VK_ACCESS_TRANSFER_READ_BIT,
-                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                        VK_PIPELINE_STAGE_TRANSFER_BIT,
-                        {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+                    draw_cmd_buffers[i],
+                    fbos.trans_sm[pong_index].images[0].get_handle(),
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                    VK_ACCESS_TRANSFER_READ_BIT,
+                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
             }
             else
             {
-                VkClearColorValue clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
+                VkClearColorValue       clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
                 VkImageSubresourceRange subresource_range{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
 
                 vkCmdClearColorImage(
@@ -2161,7 +2146,6 @@ void LinSSScatter::build_command_buffers()
 
             // Copy image to texture
             {
-
                 vkb::insert_image_memory_barrier(
                     draw_cmd_buffers[i],
                     tsm_texture.image,
@@ -3699,50 +3683,50 @@ void LinSSScatter::update_descriptor_set()
             desc_accum_texture.imageView   = fbos.trans_sm[1].views[0].get_handle();
             desc_accum_texture.sampler     = fbos.trans_sm[1].sampler;
             desc_accum_texture.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            
+
             std::vector<VkWriteDescriptorSet> write_descriptor_sets =
-            {
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    0,
-                    &desc_ubo_vs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    1,
-                    &desc_ubo_sss_fs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    2,
-                    &desc_ubo_tsm_fs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    3,
-                    &desc_accum_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    4,
-                    &desc_irr_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    5,
-                    &desc_pos_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    6,
-                    &desc_norm_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[0],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    7,
-                    &desc_bssrdf_texture)};
-        
+                {
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        0,
+                        &desc_ubo_vs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        1,
+                        &desc_ubo_sss_fs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        2,
+                        &desc_ubo_tsm_fs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        3,
+                        &desc_accum_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        4,
+                        &desc_irr_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        5,
+                        &desc_pos_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        6,
+                        &desc_norm_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[0],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        7,
+                        &desc_bssrdf_texture)};
+
             vkUpdateDescriptorSets(get_device().get_handle(), static_cast<uint32_t>(write_descriptor_sets.size()), write_descriptor_sets.data(), 0, nullptr);
         }
 
@@ -3753,48 +3737,48 @@ void LinSSScatter::update_descriptor_set()
             desc_accum_texture.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
             std::vector<VkWriteDescriptorSet> write_descriptor_sets =
-            {
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    0,
-                    &desc_ubo_vs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    1,
-                    &desc_ubo_sss_fs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    2,
-                    &desc_ubo_tsm_fs),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    3,
-                    &desc_accum_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    4,
-                    &desc_irr_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    5,
-                    &desc_pos_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    6,
-                    &desc_norm_texture),
-                vkb::initializers::write_descriptor_set(
-                    descriptor_sets.trans_sm[1],
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    7,
-                    &desc_bssrdf_texture)};
-        
+                {
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        0,
+                        &desc_ubo_vs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        1,
+                        &desc_ubo_sss_fs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        2,
+                        &desc_ubo_tsm_fs),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        3,
+                        &desc_accum_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        4,
+                        &desc_irr_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        5,
+                        &desc_pos_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        6,
+                        &desc_norm_texture),
+                    vkb::initializers::write_descriptor_set(
+                        descriptor_sets.trans_sm[1],
+                        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        7,
+                        &desc_bssrdf_texture)};
+
             vkUpdateDescriptorSets(get_device().get_handle(), static_cast<uint32_t>(write_descriptor_sets.size()), write_descriptor_sets.data(), 0, nullptr);
         }
     }
@@ -4394,6 +4378,7 @@ void LinSSScatter::update_uniform_buffers()
         ubo_vs.model = glm::rotate(ubo_vs.model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
         ubo_vs.model = glm::rotate(ubo_vs.model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
         ubo_vs.model = glm::rotate(ubo_vs.model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo_vs.model = glm::scale(ubo_vs.model, glm::vec3(1.0f, 1.0f, -1.0f));
 
         ubo_vs.sm_mvp = ubo_sm_vs.projection * ubo_sm_vs.model;
 
@@ -4515,13 +4500,13 @@ void LinSSScatter::view_changed()
     // Clear TSM accumulation
     VkCommandBuffer command_buffer = get_device().create_command_buffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
-    VkClearColorValue clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
+    VkClearColorValue       clear_color{{0.0f, 0.0f, 0.0f, 1.0f}};
     VkImageSubresourceRange subresource_range;
-    subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    subresource_range.baseMipLevel = 0;
-    subresource_range.levelCount = 1;
+    subresource_range.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    subresource_range.baseMipLevel   = 0;
+    subresource_range.levelCount     = 1;
     subresource_range.baseArrayLayer = 0;
-    subresource_range.layerCount = 1;
+    subresource_range.layerCount     = 1;
 
     vkCmdClearColorImage(
         command_buffer,
@@ -4541,7 +4526,6 @@ void LinSSScatter::view_changed()
 
     get_device().flush_command_buffer(command_buffer, queue, true);
 
-
     // Update uniform buffers
     update_uniform_buffers();
 }
@@ -4549,30 +4533,36 @@ void LinSSScatter::view_changed()
 void LinSSScatter::on_update_ui_overlay(vkb::Drawer &drawer)
 {
     static int bssrdf_type = BSSRDFType::Heart;
+    static int mesh_type   = MeshType::Fertility;
 
     if (drawer.header("Settings"))
     {
-        bool update = false;
+        bool update_ubo  = false;
+        bool update_mesh = false;
 
         // Light type
         const int prev_light_type = ubo_fs.light_type;
-        update |= drawer.combo_box("Light", &ubo_fs.light_type, {"Point", "Uffizi", "Grace"});
+        update_ubo |= drawer.combo_box("Light", &ubo_fs.light_type, {"Point", "Uffizi", "Grace"});
+
+        // Mesh type
+        const int prev_mesh_type = mesh_type;
+        update_mesh |= drawer.combo_box("Mesh", &mesh_type, {"Fertility", "Armadillo"});
 
         // BSSRDF type
         const int prev_bssrdf_type = bssrdf_type;
-        update |= drawer.combo_box("BSSRDF", &bssrdf_type, {"Heart", "Marble"});
+        update_ubo |= drawer.combo_box("BSSRDF", &bssrdf_type, {"Heart", "Marble"});
 
         // Scaling parameters
-        update |= drawer.slider_float("Irr. scale", &ubo_linsss_cs.irr_scale, 0.0f, 10.0f);
-        update |= drawer.slider_float("UV scale", &ubo_linsss_cs.tex_scale, 0.5f, 2.0f);
-        update |= drawer.slider_float("U offset", &ubo_linsss_cs.tex_offset_x, -1.0f, 1.0f);
-        update |= drawer.slider_float("V offset", &ubo_linsss_cs.tex_offset_y, -1.0f, 1.0f);
-        update |= drawer.slider_float("Sigma scale", &ubo_gauss_cs.sigma, 0.0f, 16.0f);
+        update_ubo |= drawer.slider_float("Irr. scale", &ubo_linsss_cs.irr_scale, 0.0f, 10.0f);
+        update_ubo |= drawer.slider_float("UV scale", &ubo_linsss_cs.tex_scale, 0.5f, 2.0f);
+        update_ubo |= drawer.slider_float("U offset", &ubo_linsss_cs.tex_offset_x, -1.0f, 1.0f);
+        update_ubo |= drawer.slider_float("V offset", &ubo_linsss_cs.tex_offset_y, -1.0f, 1.0f);
+        update_ubo |= drawer.slider_float("Sigma scale", &ubo_gauss_cs.sigma, 0.0f, 16.0f);
 
-        // TSM        
+        // TSM
         drawer.checkbox("TSM", &enable_tsm);
 
-        if (update)
+        if (update_ubo)
         {
             update_uniform_buffers();
 
@@ -4598,6 +4588,17 @@ void LinSSScatter::on_update_ui_overlay(vkb::Drawer &drawer)
                     prepare_bssrdf("scenes/bssrdf/MarbleSoap.sss");
                     prepare_texture(Ks_texture, "scenes/bssrdf/MarbleSoap_Ks.hdr", false);
                 }
+            }
+        }
+
+        if (update_mesh)
+        {
+            if (mesh_type != prev_mesh_type)
+            {
+                if (mesh_type == MeshType::Fertility)
+                    load_model("scenes/models/fertility.ply");
+                if (mesh_type == MeshType::Armadillo)
+                    load_model("scenes/models/armadillo.ply");
             }
         }
     }
