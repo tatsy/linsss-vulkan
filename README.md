@@ -49,11 +49,16 @@ $ ./build/app/bin/release/AMD64/vulkan_samples --sample linsss
 Screen Shot
 ---
 
-Point light             |  Grace cathedral
-:-------------------------:|:-------------------------:
-![linsss-heart-point](./figures/linsss_heart_point.jpg)  |  ![linsss-marble-grace](./figures/linsss_marble_grace.jpg)
-
-
+<table>
+  <tr>
+    <td width="50%">Point light</td>
+    <td width="50%">Point light</td>
+  </tr>
+  <tr>
+    <td><img src="./figures/linsss_heart_point.jpg" alt="linsss-heart-point"/></td>
+    <td><img src="./figures/linsss_marble_grace.jpg" alt="linsss-marble-grace"/></td>
+  </tr>
+</table>
 
 License
 ---
