@@ -15,9 +15,8 @@ Build
 
 ### Tested environment
 
-- Windows 10, Visual Studio 2019, Vulkan SDK 1.2
-
-_We know that our program as well as some samples in Vulkan-Samples do not work on MacOS Letina and multiple GPU environments._
+- Windows 10, Visual Studio 2019, LunarG Vulkan SDK 1.2.148.1
+- MacOS 10.15 Catalina, Apple Clang 12.0, LunarG Vulkan SDK 1.2.148.1
 
 ### Setup
 
@@ -32,13 +31,24 @@ Also, install `glslc` compiler for GLSL, and make sure you can run `glslc` comma
 
 ### Build
 
-You can build the project using CMake. Following command is for Windows, but can be built also in Linux with minor changes.
+#### Windows
+
+As well as the following commands, you can build the program with CMake GUI.
 
 ```shell
 $ mkdir build
 $ cd build
 $ cmake -G "Visual Studio 16 2019" -a x64 ..
 $ cmake --build . --config Release --parallel 4  # It takes much time! So, take a cup of coffee.
+```
+
+#### MacOS
+
+A new flag `VK_USE_PLATFORM_MACOS_LUNARG` is added to use LunarG SDK rather than MoltenVK (default `ON`).
+```shell
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release -DVK_USE_PLATFORM_MACOS_LUNARG=ON ..
+$ cmake --build . --parallel 4
 ```
 
 When you inspect the program, to enable the validation layer with `-DVKB_VALIDATION_LAYERS=ON` will be helpful. For more options, refer to the [Vulkan-Samples documentation](https://github.com/KhronosGroup/Vulkan-Samples/tree/master/docs).
@@ -70,7 +80,7 @@ License
 
 ### LinSSS part
 
-Apache License 2.0 (c) Tatsuya Yatagawa 2020.
+Apache License 2.0 (c) 2020, Tatsuya Yatagawa
 
 ### Framework part
 
