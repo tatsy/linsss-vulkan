@@ -51,7 +51,7 @@ Screen Shot
 
 Point light             |  Grace cathedral
 :-------------------------:|:-------------------------:
-![linsss-heart-point](./output/linsss_heart_point.jpg)  |  ![linsss-marble-grace](./output/linsss_marble_grace.jpg)
+![linsss-heart-point](./figures/linsss_heart_point.jpg)  |  ![linsss-marble-grace](./figures/linsss_marble_grace.jpg)
 
 
 
