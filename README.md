@@ -1,6 +1,9 @@
 LinSSS
 ===
 
+[![Build Status](https://travis-ci.com/tatsy/LinSSS-Vulkan.svg?branch=master)](https://travis-ci.com/tatsy/LinSSS-Vulkan)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This is a Vulkan implementation of LinSSS, a screen-space subsurface scattering for heterogeneous translucent materials.
 
 > T. Yatagawa, Y. Yamaguchi, and S. Morishima, "LinSSS: Linear decomposition of heterogeneous subsurface scattering for real-time screen-space rendering", The Visual Computer, 2020.
@@ -14,7 +17,7 @@ Build
 
 - Windows 10, Visual Studio 2019, Vulkan SDK 1.2
 
-**We know that our program as well as some samples in Vulkan-Samples do not work on MacOS Letina and multiple GPU environments.**
+_We know that our program as well as some samples in Vulkan-Samples do not work on MacOS Letina and multiple GPU environments._
 
 ### Setup
 

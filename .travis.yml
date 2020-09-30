@@ -10,8 +10,17 @@ before_install:
   # Compiler
   - if [ $CC == "gcc" ]; then export CC=gcc-9 && CXX=g++-9; fi
   - if [ $CC == "clang" ]; then export CC=clang-10 && CXX=clang++-10; fi
+  # Install packages required
+  - |
+    sudo apt-get -y install libxkbcommon-dev libwayland-dev libmirclient-dev libxrandr-dev \
+                            libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-ewmh-dev \
+                            libxcb-randr0-dev libxinerama-dev libxcursor-dev \
+                            xorg-dev libglu1-mesa-dev libxmu-dev libxi-dev
   # Vulkan SDK
-  - sudo apt-get install vulkan-sdk
+  - wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+  - sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.2.148-bionic.list https://packages.lunarg.com/vulkan/1.2.148/lunarg-vulkan-1.2.148-bionic.list
+  - sudo apt update -qq
+  - sudo apt install -y vulkan-sdk
   # Check glslc
   - glslc --version
 
@@ -33,7 +42,9 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchan-bionic-10
+      - llvm-toolchain-bionic-10
+      - sourceline: "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
       - gcc-9
       - g++-9
