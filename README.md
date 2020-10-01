@@ -27,7 +27,7 @@ $ git clone https://github.com/tatsy/linsss-vulkan.git --recursive
 $ cd linsss-vulkan
 ```
 
-Also, install `glslc` compiler for GLSL, and make sure you can run `glslc` command in a terminal. Typically, `glslc` is bundled with Vulkan SDK, but is not included in that of MoltenVK.
+Also, install `glslc` compiler for GLSL, and make sure you can run `glslc` in the terminal. Typically, `glslc` is bundled with Vulkan SDK, but is not included in that of MoltenVK. In this case, please install `glslc` from <https://github.com/google/shaderc>.
 
 ### Build
 
