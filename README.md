@@ -8,7 +8,7 @@ This is a Vulkan implementation of LinSSS, a screen-space subsurface scattering 
 
 > T. Yatagawa, Y. Yamaguchi, and S. Morishima, "LinSSS: Linear decomposition of heterogeneous subsurface scattering for real-time screen-space rendering", The Visual Computer, 2020.
 
-For more detail, visit our project page: <https://tatsy.github.io/projects/linsss20/>
+For more detail, visit our project page: <https://tatsy.github.io/projects/yatagawa2020linsss/>
 
 Build
 ---
